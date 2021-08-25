@@ -50,10 +50,10 @@ io.on('connection' , (socket) => {
         
         for(let i = 0; i < rooms.length; i++){
 
-
             if(rooms[i].room_id === arg.room_id){
                 
                 if(rooms[i].password === arg.password ){
+                    rooms[i].users.push(socket);
                     socket.emit("login_room_success",  true);
                     check = true;
                 }else{
