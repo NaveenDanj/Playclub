@@ -5,14 +5,16 @@
 </template>
 
 <script>
+import { get_socket_node } from './socketConfig';
+
 
 export default {
 
   name: 'App',
 
-  mounted(){
-    
-  }
+  created(){
+    console.log(get_socket_node());
+  },
 
 }
 </script>
