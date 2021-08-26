@@ -32,6 +32,7 @@ io.on('connection' , (socket) => {
         if(!check){
             socket.join(arg.room_id);
             let obj = arg;
+            obj.admin = socket;
             obj.users = [socket];
             rooms.push(arg);
             console.log('the rooms are' , rooms);
@@ -39,6 +40,18 @@ io.on('connection' , (socket) => {
         }else{
             console.log('the error');
             socket.emit("create_room_error",  true);
+        }
+
+    });
+
+    socket.on("disconnect", (reason) => {
+        //handle user disconnecting event. distroy rooms if admins disconnected from their room
+        console.log('user disconnected!');
+
+        for(let i = 0; i < rooms.length; i++){
+            if(rooms[i].admin.id == socket.id){
+                console.log('found room with admin leave');
+            }
         }
 
     });
@@ -53,9 +66,16 @@ io.on('connection' , (socket) => {
             if(rooms[i].room_id === arg.room_id){
                 
                 if(rooms[i].password === arg.password ){
-                    rooms[i].users.push(socket);
-                    socket.emit("login_room_success",  true);
-                    check = true;
+
+                    if(rooms[i].max_users > rooms[i].users.length){
+                        rooms[i].users.push(socket);
+                        socket.emit("login_room_success",  true);
+                        check = true;
+                    }else{
+                        socket.emit("login_room_error",  'exceed the maximum users per room');
+                        check = true;
+                    }
+
                 }else{
                     socket.emit("login_room_error",  true);
                 }

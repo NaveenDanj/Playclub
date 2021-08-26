@@ -134,7 +134,7 @@ export default {
 
       if(this.display_name != '' && this.room_id != '' && this.password != '' && this.max_users != null){
         console.log('form submitted!');
-        get_socket_node().emit("create_room",  {admin_name : this.display_name , room_id : this.room_id , password : this.password , users : this.max_users });
+        get_socket_node().emit("create_room",  {admin_name : this.display_name , room_id : this.room_id , password : this.password , max_users : this.max_users });
       }else{
         console.log('form has error!');
       }
