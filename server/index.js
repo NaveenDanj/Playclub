@@ -33,7 +33,7 @@ io.on('connection' , (socket) => {
             socket.join(arg.room_id);
             let obj = arg;
             obj.admin = socket;
-            obj.users = [socket];
+            obj.users = [{id : socket.id , username : arg.admin_name}];
             rooms.push(arg);
             console.log('the rooms are' , rooms);
             socket.emit("create_room_success",  arg.room_id);
@@ -49,9 +49,22 @@ io.on('connection' , (socket) => {
         console.log('user disconnected!');
 
         for(let i = 0; i < rooms.length; i++){
+
             if(rooms[i].admin.id == socket.id){
                 console.log('found room with admin leave');
             }
+
+            for(let j = 0; j < rooms[i].users.length; j++){
+
+                if(rooms[i].users[j].id == socket.id){
+                    rooms[i].users.splice(j , 1);
+                    console.log('user deleted!');
+                    socket.to(rooms[i].room_id).emit('user_left_event' , rooms[i].users);
+                }
+
+            }
+
+
         }
 
     });
@@ -68,7 +81,8 @@ io.on('connection' , (socket) => {
                 if(rooms[i].password === arg.password ){
 
                     if(rooms[i].max_users > rooms[i].users.length){
-                        rooms[i].users.push(socket);
+                        rooms[i].users.push({id : socket.id , name : arg.username});
+                        socket.join(arg.room_id);
                         socket.emit("login_room_success",  true);
                         check = true;
                     }else{

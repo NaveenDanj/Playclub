@@ -95,7 +95,7 @@ export default {
     return {
       disabled : true,
       display_name : '',
-      room_id : 'asd',
+      room_id : '',
       password : '',
       max_users : 4
     }

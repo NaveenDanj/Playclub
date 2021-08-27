@@ -246,29 +246,15 @@
                                 <v-list-item-title v-html="'Sample Title'"></v-list-item-title>
                             </v-list-item-content>
 
-                        </v-list-item>
+                            <v-list-item-action>
 
-                        <v-list-item>
+                                <v-btn icon>
+                                    
+                                    <v-icon color="gold">mdi-exit-to-app </v-icon>
 
-                            <v-list-item-avatar>
-                                <v-icon style="font-size : 30px;" >mdi-account-circle </v-icon>
-                            </v-list-item-avatar>
-
-                            <v-list-item-content>
-                                <v-list-item-title v-html="'Sample Title'"></v-list-item-title>
-                            </v-list-item-content>
-
-                        </v-list-item>
-
-                        <v-list-item>
-
-                            <v-list-item-avatar>
-                                <v-icon style="font-size : 30px;" >mdi-account-circle </v-icon>
-                            </v-list-item-avatar>
-
-                            <v-list-item-content>
-                                <v-list-item-title v-html="'Sample Title'"></v-list-item-title>
-                            </v-list-item-content>
+                                </v-btn>
+                                
+                            </v-list-item-action>
 
                         </v-list-item>
 
@@ -455,7 +441,16 @@
 
 <script>
 
+    import { get_socket_node } from '../socketConfig';
+
+
     export default {
+
+        created(){
+            get_socket_node().on('user_left_event' , (arg) => {
+                console.log('user left' , arg);
+            });
+        },
 
         data(){
             return {

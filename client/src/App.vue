@@ -126,6 +126,7 @@ export default {
         { title: 'Home', icon: 'mdi-view-dashboard' , link : '/' },
         { title: 'Join', icon: 'mdi-location-enter ' , link : '/join' },
         { title: 'About', icon: 'mdi-help-box' , link : '/about' },
+        { title: 'Room', icon: 'mdi-google-classroom ' , link : '/room' },
       ],
       right: null,
 
