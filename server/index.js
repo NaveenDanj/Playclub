@@ -121,6 +121,11 @@ io.on('connection' , (socket) => {
         socket.leave(arg);
     });
 
+
+    socket.on('send_message_request' , (arg) => {
+        io.to(arg.room_id).emit('receive_message' , {arg});
+    });
+
     socket.on("join_room", (arg) => {
 
         let check = false;

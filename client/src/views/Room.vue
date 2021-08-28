@@ -19,91 +19,39 @@
 
                 <v-list three-line height="600px" style="overflow-y : scroll;">
 
-                    <v-list-item>
+                    <v-list-item v-for="(item , index) in this.message_list" :key="index">
 
                         <v-list-item-avatar>
                             <v-icon style="font-size : 40px;" >mdi-account-circle </v-icon>
                         </v-list-item-avatar>
 
                         <v-list-item-content>
-                            <v-list-item-title v-html="'Sample Title'"></v-list-item-title>
-                            <v-list-item-subtitle v-html="'Sample Subtitle'"></v-list-item-subtitle>
+                            <v-list-item-title v-html="item.arg.sender_username"></v-list-item-title>
+                            <v-list-item-subtitle v-html="item.arg.message"></v-list-item-subtitle>
                             <hr/>
                         </v-list-item-content>
 
                     </v-list-item>
 
-                    <v-list-item>
-
-                        <v-list-item-avatar>
-                            <v-icon style="font-size : 40px;" >mdi-account-circle </v-icon>
-                        </v-list-item-avatar>
-
-                        <v-list-item-content>
-                            <v-list-item-title v-html="'Sample Title'"></v-list-item-title>
-                            <v-list-item-subtitle v-html="'Sample Subtitle'"></v-list-item-subtitle>
-                            <hr/>
-                        </v-list-item-content>
-
-                    </v-list-item>
-
-                    <v-list-item>
-
-                        <v-list-item-avatar>
-                            <v-icon style="font-size : 40px;" >mdi-account-circle </v-icon>
-                        </v-list-item-avatar>
-
-                        <v-list-item-content>
-                            <v-list-item-title v-html="'Sample Title'"></v-list-item-title>
-                            <v-list-item-subtitle v-html="'Sample Subtitle'"></v-list-item-subtitle>
-                            <hr/>
-                        </v-list-item-content>
-
-                    </v-list-item>
-
-                    
-                    <v-list-item>
-
-                        <v-list-item-avatar>
-                            <v-icon style="font-size : 40px;" >mdi-account-circle </v-icon>
-                        </v-list-item-avatar>
-
-                        <v-list-item-content>
-                            <v-list-item-title v-html="'Sample Title'"></v-list-item-title>
-                            <v-list-item-subtitle v-html="'Sample Subtitle'"></v-list-item-subtitle>
-                            <hr/>
-                        </v-list-item-content>
-
-                    </v-list-item>
-
-                    <v-list-item>
-
-                        <v-list-item-avatar>
-                            <v-icon style="font-size : 40px;" >mdi-account-circle </v-icon>
-                        </v-list-item-avatar>
-
-                        <v-list-item-content>
-                            <v-list-item-title v-html="'Sample Title'"></v-list-item-title>
-                            <v-list-item-subtitle v-html="'Sample Subtitle'"></v-list-item-subtitle>
-                            <hr/>
-                        </v-list-item-content>
-
-                    </v-list-item>
 
                 </v-list>
 
                 <v-container>
 
                     <v-form>
+
                         <v-text-field
-                            append-outer-icon="mdi-send"
-                            prepend-icon="mdi-close-circle"
+                            v-model="message_text"
+                            @click:append-outer="sendMessage"
                             filled
+                            append-outer-icon="mdi-send"
                             clear-icon="mdi-close-circle"
                             clearable
                             label="Message"
                             type="text"
                         ></v-text-field>
+
+
                     </v-form>
 
                 </v-container>
@@ -480,6 +428,12 @@
                 this.$store.state.username = '';
                 this.$store.state.adminID = '';
                 this.$router.replace('/');
+            });
+
+            get_socket_node().on('receive_message' , (arg) => {
+                console.log('the data is ' , arg);
+                this.message_list.push(arg);
+                console.log('the array is ' , this.message_list);
             })
 
         },
@@ -489,6 +443,14 @@
             handleKickUser(userid){
                 console.log('the user id is ' , userid);
                 get_socket_node().emit('request_kick_user' , { user_id : userid , room_id : this.$store.state.currentRoom});
+            },
+
+            sendMessage(){
+                console.log('the text is ' , this.message_text);
+                if(this.message_text != ''){
+                    get_socket_node().emit('send_message_request' , {sender_username : this.$store.state.username , message : this.message_text , room_id :  this.$store.state.currentRoom});
+                    this.message_text = '';
+                }
             }
 
         },
@@ -497,7 +459,9 @@
             return {
                 selected : false,
                 users_list : [],
-                userSocketID : get_socket_node().id
+                message_list : [],
+                userSocketID : get_socket_node().id,
+                message_text : '',
             }
         }
 
