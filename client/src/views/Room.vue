@@ -460,6 +460,13 @@
                 this.users_list = arg;
             });
 
+            get_socket_node().on('room_remove_event' , () => {
+                get_socket_node().emit('user_leave_room_request' , this.$store.state.currentRoom);
+                this.$store.state.currentRoom = '';
+                this.$store.state.username = '';
+                this.$router.replace('/');
+            })
+
             get_socket_node().emit('get_room_user_list' , this.$store.state.currentRoom);
             get_socket_node().on('room_user_list_response' , (arg) => {
                 console.log(arg);

@@ -15,11 +15,12 @@ app.get('/' , (req , res) => {
 });
 
 io.on('connection' , (socket) => {
+
     console.log('new user connected!' , rooms);
 
     socket.on("create_room", (arg) => {
 
-        let check = false;
+        let check = false;        
 
         for(let i = 0; i < rooms.length; i++){
 
@@ -52,18 +53,28 @@ io.on('connection' , (socket) => {
 
             if(rooms[i].admin.id == socket.id){
                 console.log('found room with admin leave');
+                io.to(rooms[i].room_id).emit('room_remove_event' , true);
+                rooms.splice(i , 1);
+                continue;
             }
 
-            for(let j = 0; j < rooms[i].users.length; j++){
+            if(rooms.length > 0){
 
-                if(rooms[i].users[j].id == socket.id){
-                    rooms[i].users.splice(j , 1);
-                    console.log('user deleted!');
-                    io.to(rooms[i].room_id).emit('user_left_event' , rooms[i].users);
+                if(rooms[i].users){
+                    for(let j = 0; j < rooms[i].users.length; j++){
+
+                        if(rooms[i].users[j].id == socket.id){
+                            rooms[i].users.splice(j , 1);
+                            console.log('user deleted!');
+                            io.to(rooms[i].room_id).emit('user_left_event' , rooms[i].users);
+                        }
+        
+                    }
                 }
 
-            }
 
+                
+            }
 
         }
 
@@ -82,6 +93,10 @@ io.on('connection' , (socket) => {
 
 
     })
+
+    socket.on('user_leave_room_request' , (arg) => {
+        socket.leave(arg);
+    });
 
     socket.on("join_room", (arg) => {
 

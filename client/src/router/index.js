@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import store from '../store';
+
 // import Home from '../views/Home.vue'
 
 Vue.use(VueRouter)
@@ -23,7 +25,14 @@ const routes = [
   {
     path: '/room',
     name: 'Room',
-    component: () => import(/* webpackChunkName: "about" */ '../views/Room.vue')
+    component: () => import(/* webpackChunkName: "about" */ '../views/Room.vue'),
+    beforeEnter : (to , from , next) => {
+      if(store.state.currentRoom != ''){
+        next();
+      }else{
+        next(false);
+      }
+    }
   }
   
 ]
