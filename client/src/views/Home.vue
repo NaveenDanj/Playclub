@@ -111,6 +111,8 @@ export default {
 
     get_socket_node().on('create_room_success' , (args) => {
       console.log('room created successfully!' , args);
+      this.$store.state.username = args.admin_name;
+      this.$store.state.currentRoom = args.room_id;
     });
 
     get_socket_node().on('create_room_error' , (args) => {

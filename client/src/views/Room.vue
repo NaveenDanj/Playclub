@@ -233,17 +233,17 @@
                 
                     <v-list height="19vh" style="overflow-y : scroll">
 
-                        <v-subheader>Users Online(4)</v-subheader>
+                        <v-subheader>Users Online({{this.users_list.length}})</v-subheader>
 
 
-                        <v-list-item>
+                        <v-list-item v-for="(item , index) in this.users_list" :key="index">
 
                             <v-list-item-avatar>
                                 <v-icon style="font-size : 30px;" >mdi-account-circle </v-icon>
                             </v-list-item-avatar>
 
                             <v-list-item-content>
-                                <v-list-item-title v-html="'Sample Title'"></v-list-item-title>
+                                <v-list-item-title v-html="item.username"></v-list-item-title>
                             </v-list-item-content>
 
                             <v-list-item-action>
@@ -447,14 +447,31 @@
     export default {
 
         created(){
+
+            console.log('craeted');
+
             get_socket_node().on('user_left_event' , (arg) => {
                 console.log('user left' , arg);
+                this.users_list = arg;
             });
+
+            get_socket_node().on('user_join_event' , (arg) => {
+                console.log('user join' , arg);
+                this.users_list = arg;
+            });
+
+            get_socket_node().emit('get_room_user_list' , this.$store.state.currentRoom);
+            get_socket_node().on('room_user_list_response' , (arg) => {
+                console.log(arg);
+                this.users_list = arg;
+            });
+
         },
 
         data(){
             return {
                 selected : false,
+                users_list : [],
             }
         }
 

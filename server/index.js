@@ -36,7 +36,7 @@ io.on('connection' , (socket) => {
             obj.users = [{id : socket.id , username : arg.admin_name}];
             rooms.push(arg);
             console.log('the rooms are' , rooms);
-            socket.emit("create_room_success",  arg.room_id);
+            socket.emit("create_room_success",  {admin_name : arg.admin_name , room_id : arg.room_id});
         }else{
             console.log('the error');
             socket.emit("create_room_error",  true);
@@ -59,7 +59,7 @@ io.on('connection' , (socket) => {
                 if(rooms[i].users[j].id == socket.id){
                     rooms[i].users.splice(j , 1);
                     console.log('user deleted!');
-                    socket.to(rooms[i].room_id).emit('user_left_event' , rooms[i].users);
+                    io.to(rooms[i].room_id).emit('user_left_event' , rooms[i].users);
                 }
 
             }
@@ -68,6 +68,20 @@ io.on('connection' , (socket) => {
         }
 
     });
+
+    socket.on('get_room_user_list' , (arg) => {
+        
+        for(let i = 0; i < rooms.length; i++){
+
+            if(rooms[i].room_id == arg){
+                socket.emit('room_user_list_response' , rooms[i].users);
+                break;
+            }
+
+        }
+
+
+    })
 
     socket.on("join_room", (arg) => {
 
@@ -81,9 +95,10 @@ io.on('connection' , (socket) => {
                 if(rooms[i].password === arg.password ){
 
                     if(rooms[i].max_users > rooms[i].users.length){
-                        rooms[i].users.push({id : socket.id , name : arg.username});
+                        rooms[i].users.push({id : socket.id , username : arg.username});
                         socket.join(arg.room_id);
-                        socket.emit("login_room_success",  true);
+                        socket.emit("login_room_success",  arg);
+                        io.to(rooms[i].room_id).emit('user_join_event' , rooms[i].users);
                         check = true;
                     }else{
                         socket.emit("login_room_error",  'exceed the maximum users per room');

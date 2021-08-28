@@ -107,7 +107,7 @@ export default {
         if(this.display_name != '' && this.room_id != '' && this.password != '' && this.max_users != null){
             get_socket_node().emit("join_room",  {username : this.display_name ,  room_id : this.room_id , password : this.password });
         }else{
-            console.log('form has error!');
+          console.log('form has error!');
         }
     }
   
@@ -116,11 +116,15 @@ export default {
   created(){
 
     get_socket_node().on('login_room_success' , (arg) => {
-        console.log('login success ' , arg);
+      console.log('login success ' , arg);
+
+      this.$store.state.username = arg.username;
+      this.$store.state.currentRoom = arg.room_id;
+
     });
 
     get_socket_node().on('login_room_error' , (arg) => {
-        console.log('login error ' , arg);
+      console.log('login error ' , arg);
     });
 
 
