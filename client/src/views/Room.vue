@@ -246,9 +246,9 @@
                                 <v-list-item-title v-html="item.username"></v-list-item-title>
                             </v-list-item-content>
 
-                            <v-list-item-action>
+                            <v-list-item-action v-if="$store.state.adminID != '' && $store.state.adminID != item.id " >
 
-                                <v-btn icon>
+                                <v-btn @click="handleKickUser(item.id)" icon>
                                     
                                     <v-icon color="gold">mdi-exit-to-app </v-icon>
 
@@ -464,6 +464,7 @@
                 get_socket_node().emit('user_leave_room_request' , this.$store.state.currentRoom);
                 this.$store.state.currentRoom = '';
                 this.$store.state.username = '';
+                this.$store.state.adminID = '';
                 this.$router.replace('/');
             })
 
@@ -473,12 +474,30 @@
                 this.users_list = arg;
             });
 
+
+            get_socket_node().on('admin_kicked' , () => {
+                this.$store.state.currentRoom = '';
+                this.$store.state.username = '';
+                this.$store.state.adminID = '';
+                this.$router.replace('/');
+            })
+
+        },
+
+        methods : {
+
+            handleKickUser(userid){
+                console.log('the user id is ' , userid);
+                get_socket_node().emit('request_kick_user' , { user_id : userid , room_id : this.$store.state.currentRoom});
+            }
+
         },
 
         data(){
             return {
                 selected : false,
                 users_list : [],
+                userSocketID : get_socket_node().id
             }
         }
 

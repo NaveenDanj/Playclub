@@ -45,6 +45,32 @@ io.on('connection' , (socket) => {
 
     });
 
+    socket.on('request_kick_user' , (arg) => {
+        console.log('kick user ' , arg.user_id);
+        
+        for(let i = 0; i < rooms.length; i++){
+
+            if(rooms[i].room_id == arg.room_id){
+                
+                for(let j = 0; j < rooms[i].users.length; j++){
+
+                    if(rooms[i].users[j].id == arg.user_id){
+                        rooms[i].users.splice(j , 1);
+                        console.log('the user deleted!')
+                        io.to(rooms[i].room_id).emit('user_left_event' , rooms[i].users);
+                        io.sockets.sockets.get(arg.user_id).emit('admin_kicked' , true)
+                        io.sockets.sockets.get(arg.user_id).leave(arg.room_id);
+                        break;
+                    }
+
+                }
+
+            }
+
+        }
+
+    });
+
     socket.on("disconnect", (reason) => {
         //handle user disconnecting event. distroy rooms if admins disconnected from their room
         console.log('user disconnected!');
@@ -72,8 +98,6 @@ io.on('connection' , (socket) => {
                     }
                 }
 
-
-                
             }
 
         }
@@ -90,7 +114,6 @@ io.on('connection' , (socket) => {
             }
 
         }
-
 
     })
 

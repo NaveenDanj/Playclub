@@ -57,7 +57,25 @@
 
       </v-treeview>
 
+      <v-divider></v-divider>
 
+      <v-list dense >
+        <v-list-item link>
+
+          <v-list-item-icon>
+            Room ID
+          </v-list-item-icon>
+
+          <v-list-item-content >
+            <v-list-item-title @click="handleCopyText">7585836f-459c-44c9-88db-55a9bdd7e388</v-list-item-title>
+          </v-list-item-content>
+
+        </v-list-item>
+
+        <v-list-item link>
+          asd
+        </v-list-item>
+      </v-list>
 
     </v-navigation-drawer>
 
@@ -150,6 +168,12 @@ export default {
   created(){
     console.log(get_socket_node());
   },
+
+  methods : {
+    handleCopyText(){
+      navigator.clipboard.writeText("test value");
+    }
+  }
 
 }
 </script>

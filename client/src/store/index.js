@@ -11,6 +11,7 @@ const store = new Vuex.Store({
     state: {
         username : '',
         currentRoom : '',
+        adminID : '',
     },
 
 
