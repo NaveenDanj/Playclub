@@ -1,6 +1,8 @@
 const express = require("express")
 var app = express();
 var server = app.listen(5555);
+const multer = require('multer');
+const path = require('path');
 
 let rooms = [];
 
@@ -10,9 +12,35 @@ var io = require('socket.io')(server, {
     }
 });
 
+const storage = multer.diskStorage({
+    destination : 'uploads',
+    filename : function(req , file , cb){
+        cb(null , file.fieldname + '-' + Date.now() + path.extname(file.originalname) );
+    }
+})
+
+const upload = multer({
+    storage : storage
+}).single('music_file');
+
+
 app.get('/' , (req , res) => {
     res.send('Hello World');
 });
+
+
+app.post('/upload' , (req  , res) => {
+
+})
+
+
+
+
+
+
+
+
+//socket 
 
 io.on('connection' , (socket) => {
 
@@ -104,6 +132,9 @@ io.on('connection' , (socket) => {
 
     });
 
+
+    //user handlings
+
     socket.on('get_room_user_list' , (arg) => {
         
         for(let i = 0; i < rooms.length; i++){
@@ -161,6 +192,10 @@ io.on('connection' , (socket) => {
         }
 
     });
+
+    //voting system
+
+    //audio controling system
 
 
 })
