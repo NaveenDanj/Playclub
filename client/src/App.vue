@@ -67,7 +67,7 @@
           </v-list-item-icon>
 
           <v-list-item-content >
-            <v-list-item-title @click="handleCopyText">7585836f-459c-44c9-88db-55a9bdd7e388</v-list-item-title>
+            <v-list-item-title @click="handleCopyText">{{this.$store.state.room_id}}</v-list-item-title>
           </v-list-item-content>
 
         </v-list-item>
@@ -124,7 +124,7 @@
         class="blue lighten-1 text-center"
       >
         <v-card-text class="white--text">
-          {{ new Date().getFullYear() }} — <strong>PLAYCLUB</strong>
+          {{ new Date().getFullYear() }} — <strong>PLAYCLUB v1.0.0</strong>
         </v-card-text>
       </v-card>
     </v-footer>
