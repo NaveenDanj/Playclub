@@ -1,8 +1,14 @@
 const express = require("express")
 var app = express();
+const cors = require('cors');
 var server = app.listen(5555);
 const multer = require('multer');
 const path = require('path');
+
+const bodyParser = require('body-parser')
+
+
+// app.use(cors());
 
 let rooms = [];
 
@@ -11,6 +17,15 @@ var io = require('socket.io')(server, {
       origin: '*',
     }
 });
+
+app.use((req, res, next) => {
+    res.header({
+        "Access-Control-Allow-Origin": "*",
+    });
+    next();
+}) 
+
+
 
 const storage = multer.diskStorage({
     destination : 'uploads',
@@ -30,6 +45,17 @@ app.get('/' , (req , res) => {
 
 
 app.post('/upload' , (req  , res) => {
+    upload(req , res , (err) => {
+        if(err){
+            console.log('the upload error is ' , err);
+            res.send('error')
+        }else{
+            console.log('the uploaded file is ' , req.file);
+            res.send({file : req.file});
+        }
+    })
+
+    console.log('the request data is ' , req.body.test_data);
 
 })
 
@@ -63,6 +89,7 @@ io.on('connection' , (socket) => {
             let obj = arg;
             obj.admin = socket;
             obj.users = [{id : socket.id , username : arg.admin_name}];
+            obj.music_files = [];
             rooms.push(arg);
             console.log('the rooms are' , rooms);
             socket.emit("create_room_success",  {admin_name : arg.admin_name , room_id : arg.room_id});
