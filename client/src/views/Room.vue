@@ -86,7 +86,7 @@
 
                             <v-spacer></v-spacer>
 
-                            <UploadMusicDialog />
+                            <UploadMusicDialog v-if="$store.state.adminID != '' && $store.state.adminID != item.id " />
 
                         </v-subheader>
 
