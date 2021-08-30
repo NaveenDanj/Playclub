@@ -77,16 +77,12 @@
 
             <v-card>
 
-                 
-                
-               
-
                 <v-container>
 
                     <v-list flat>
 
                         <v-subheader>
-                            <h3>Music List(10)</h3>
+                            <h3>Music List({{this.music_list.length}})</h3>
 
                             <v-spacer></v-spacer>
 
@@ -96,15 +92,27 @@
 
                         <v-list-item-group color="primary">
 
-                            <v-list-item>
+                            <v-list-item v-for="(item , index) in  this.music_list" :key="index">
 
                                 <v-list-item-icon>
                                     <v-icon v-text="'mdi-music-circle '"></v-icon>
                                 </v-list-item-icon>
 
                                 <v-list-item-content>
-                                    <v-list-item-title v-text="'Sample Music File'"></v-list-item-title>
+                                    <v-list-item-title v-text="item.file"></v-list-item-title>
                                 </v-list-item-content>
+
+                                <v-list-item-action v-if="$store.state.adminID != '' && $store.state.adminID != item.id " >
+
+                                    <v-btn @click="deleteFile(item.file)" icon>
+                                        
+                                        <v-icon color="gold">mdi-delete</v-icon>
+
+                                    </v-btn>
+                                    
+                                </v-list-item-action>
+
+
 
                             </v-list-item>
 
@@ -351,6 +359,11 @@
 
             console.log('craeted');
 
+            get_socket_node().on('new_music_upload' , (data) => {
+                console.log('new upload' , data);
+                this.music_list = data;
+            });
+
             get_socket_node().on('user_left_event' , (arg) => {
                 console.log('user left' , arg);
                 this.users_list = arg;
@@ -367,7 +380,7 @@
                 this.$store.state.username = '';
                 this.$store.state.adminID = '';
                 this.$router.replace('/');
-            })
+            });
 
             get_socket_node().emit('get_room_user_list' , this.$store.state.currentRoom);
             get_socket_node().on('room_user_list_response' , (arg) => {
@@ -375,7 +388,13 @@
                 this.users_list = arg;
             });
 
+            get_socket_node().emit('get_room_song_list' , this.$store.state.currentRoom);
+            get_socket_node().on('room_music_list_response' , (arg) => {
 
+                console.log('the musics are ' , arg);
+                this.music_list = arg;
+            });
+            
             get_socket_node().on('admin_kicked' , () => {
                 this.$store.state.currentRoom = '';
                 this.$store.state.username = '';
@@ -387,7 +406,7 @@
                 console.log('the data is ' , arg);
                 this.message_list.push(arg);
                 console.log('the array is ' , this.message_list);
-            })
+            });
 
         },
 
@@ -404,6 +423,12 @@
                     get_socket_node().emit('send_message_request' , {sender_username : this.$store.state.username , message : this.message_text , room_id :  this.$store.state.currentRoom});
                     this.message_text = '';
                 }
+            },
+
+            deleteFile(file){
+
+                get_socket_node().emit('request_delte_file' , {filename : file , room_id : this.$store.state.currentRoom});
+
             }
 
         },
@@ -413,6 +438,7 @@
                 selected : false,
                 users_list : [],
                 message_list : [],
+                music_list : [],
                 userSocketID : get_socket_node().id,
                 message_text : '',
             }

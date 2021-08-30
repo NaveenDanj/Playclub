@@ -2,6 +2,7 @@
 <template>
   <div class="text-center">
     <v-dialog
+      persistent
       v-model="dialog"
       width="500"
     >
@@ -43,6 +44,7 @@
 
           <v-card-actions>
             <v-btn
+              :disabled="this.loading"
               color="primary"
               text
               @click="dialog = false"
@@ -55,7 +57,7 @@
               text
               type="submit"
             >
-              Upload
+              {{ this.loading == true ?  'Uploading...' : 'Upload'}}
             </v-btn>
 
           </v-card-actions>
@@ -69,11 +71,16 @@
 </template>
 
 <script>
+
+  import { get_socket_node } from '../../socketConfig';
+
+
   export default {
     data () {
       return {
         dialog: false,
         file : null,
+        loading : false,
       }
     },
 
@@ -86,14 +93,23 @@
         formData.append('music_file' , this.file);
         formData.append('test_data' , 'this is a test data');
 
+        this.loading = true;
+
         fetch('http://localhost:5555/upload' , {
           method : 'POST',
           body : formData,
 
         })
         .then(response=>response.json())
-        .then(data=>{ console.log(data); })
-        .catch(err => console.log('the error is ' , err));
+        .then(data=>{ 
+          console.log(data);
+          this.loading = false;
+          get_socket_node().emit('upload_music' , {filename : data.file.filename , room_id : this.$store.state.currentRoom})
+         })
+        .catch(err => {
+          console.log(err);
+          this.loading = false;
+        });
 
       }
     }

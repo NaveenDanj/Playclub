@@ -4,8 +4,7 @@ const cors = require('cors');
 var server = app.listen(5555);
 const multer = require('multer');
 const path = require('path');
-
-const bodyParser = require('body-parser')
+var fs = require('fs');
 
 
 // app.use(cors());
@@ -173,7 +172,20 @@ io.on('connection' , (socket) => {
 
         }
 
-    })
+    });
+
+    socket.on('get_room_song_list' , (arg) => {
+
+        for(let i = 0; i < rooms.length; i++){
+
+            if(rooms[i].room_id == arg){
+                socket.emit('room_music_list_response' , rooms[i].music_files);
+                break;
+            }
+
+        }
+
+    });
 
     socket.on('user_leave_room_request' , (arg) => {
         socket.leave(arg);
@@ -223,6 +235,58 @@ io.on('connection' , (socket) => {
     //voting system
 
     //audio controling system
+
+    socket.on("upload_music", (arg) => {
+
+        for(let i = 0; i < rooms.length; i++){
+
+            if(arg.room_id === rooms[i].room_id){
+                rooms[i].music_files.push({file: arg.filename , vote : 0});
+                io.to(arg.room_id).emit('new_music_upload' , rooms[i].music_files);
+                break;
+            }
+
+        }
+
+    
+    });
+
+    socket.on('request_delte_file' , (arg) => {
+
+        fs.stat('./uploads/' + arg.filename , function (err, stats) {
+            console.log(stats);//here we got all information of file in stats variable
+         
+            if (err) {
+                return console.error(err);
+            }
+         
+            fs.unlink('./uploads/' + arg.filename , function(err){
+                if(err) return console.log(err);
+                
+                for(let i = 0; i < rooms.length; i++){
+
+                    if(arg.room_id === rooms[i].room_id){
+
+                        for(let j = 0; j < rooms[i].music_files.length; j++){
+
+                            if(rooms[i].music_files[j].file === arg.filename){
+                                rooms[i].music_files.splice(j , 1);
+                                io.to(arg.room_id).emit('new_music_upload' , rooms[i].music_files);
+                                break;
+                            }
+
+                        }
+                        
+                    }
+        
+                }
+
+
+            });  
+        });
+
+
+    })
 
 
 })
