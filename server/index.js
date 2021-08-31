@@ -131,7 +131,24 @@ io.on('connection' , (socket) => {
             if(rooms[i].admin.id == socket.id){
                 console.log('found room with admin leave');
                 io.to(rooms[i].room_id).emit('room_remove_event' , true);
-                rooms.splice(i , 1);
+
+                for(let j = 0; j < rooms[i].music_files.length; j++){
+
+                    fs.stat('./uploads/' +  rooms[i].music_files[j].file , function (err, stats) {
+                        console.log(stats);//here we got all information of file in stats variable
+                     
+                        if (err) {
+                            return console.error(err);
+                        }
+                     
+                        fs.unlink('./uploads/' + rooms[i].music_files[j].file , function(err){
+                            if(err) return console.log(err);
+                            rooms.splice(i , 1);
+                        });  
+                    });
+
+                }
+
                 continue;
             }
 

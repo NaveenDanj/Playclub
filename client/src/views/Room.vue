@@ -79,14 +79,14 @@
 
                 <v-container>
 
-                    <v-list flat>
+                    <v-list height="35vh" style="overflow-y : scroll" flat>
 
                         <v-subheader>
                             <h3>Music List({{this.music_list.length}})</h3>
 
                             <v-spacer></v-spacer>
 
-                            <UploadMusicDialog v-if="$store.state.adminID != '' && $store.state.adminID != item.id " />
+                            <UploadMusicDialog v-if="$store.state.adminID != '' " />
 
                         </v-subheader>
 
