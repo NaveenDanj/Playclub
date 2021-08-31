@@ -86,6 +86,7 @@ io.on('connection' , (socket) => {
             obj.admin = socket;
             obj.users = [{id : socket.id , username : arg.admin_name}];
             obj.music_files = [];
+            obj.votable = false;
             rooms.push(arg);
             console.log('the rooms are' , rooms);
             socket.emit("create_room_success",  {admin_name : arg.admin_name , room_id : arg.room_id});
@@ -247,6 +248,55 @@ io.on('connection' , (socket) => {
     });
 
     //voting system
+
+    socket.on('change_votable' , (arg) => {
+
+        for(let i = 0; i < rooms.length; i++){
+
+            if(arg === rooms[i].room_id){
+                rooms[i].votable = !rooms[i].votable;
+                io.to(rooms[i].room_id).emit('votable_changed' , rooms[i].votable);
+            }
+
+        }
+
+    });
+
+    socket.on('vote_music' , (arg) => {
+
+        for(let i = 0; i < rooms.length; i++){
+
+            if(arg.room_id === rooms[i].room_id){
+
+                for(let j = 0; j < rooms[i].music_files.length; j++){
+
+                    if(rooms[i].music_files[j].file === arg.filename){
+
+                        if(arg.vote_type === 'increment'){
+                            rooms[i].music_files[j].vote += 1;
+                        }else{
+                            rooms[i].music_files[j].vote -= 1;
+                        }
+
+                        rooms[i].music_files.sort((a , b) => {
+                            if(a.vote > b.vote){
+                                return -1;
+                            }else{
+                                return 1;
+                            }
+                        });
+
+                        io.to(arg.room_id).emit('new_music_upload' , rooms[i].music_files);
+
+                    }
+
+                }
+               
+            }
+
+        }
+
+    });
 
     //audio controling system
 

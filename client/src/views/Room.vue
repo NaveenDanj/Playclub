@@ -180,7 +180,7 @@
                 <v-row class="text-center mt-1">
 
                     <v-col cols="12" md="6">
-                        <v-btn class="ml-1 " width="100%"  outlined color="indigo" >Vote For Skip (5)</v-btn>
+                        <v-btn class="ml-1 " width="100%"  outlined color="indigo" >Skip (5)</v-btn>
                     </v-col>
 
                     <v-col cols="12" md="6">
@@ -202,7 +202,7 @@
 
                     <v-spacer></v-spacer>
 
-                    <v-btn icon>
+                    <v-btn @click="changeCanVote" v-if="this.$store.state.adminID != '' " icon>
                         <v-icon>mdi-checkbox-marked-circle</v-icon>
                     </v-btn>
 
@@ -211,122 +211,43 @@
                 <v-list height="400px" style="overflow-y:scroll;" two-line>
                     <v-list-item-group
                         v-model="selected"
-                        active-class="pink--text"
                     >
                         <template>
 
-                            <v-list-item >
+                            <v-list-item :inactive="true"  @click="handleVoteMusic(item)" v-for="(item , index) in this.music_list" :key="index"  >
 
-                                <template v-slot:default="{ active }">
 
-                                    <v-list-item-content>
-                                        <v-list-item-title v-text="'Sample Title'"></v-list-item-title>
+                                <v-list-item-content>
+                                    <v-list-item-title v-text="item.file"></v-list-item-title>
 
-                                        <v-list-item-subtitle
-                                            class="text--primary"
-                                            v-text="'headline'"
-                                        ></v-list-item-subtitle>
+                                    <v-list-item-subtitle
+                                        class="text--primary"
+                                        v-text=" 'Votes : ' + item.vote"
+                                    ></v-list-item-subtitle>
 
-                                        <v-list-item-subtitle v-text="'Sample subtitile'"></v-list-item-subtitle>
-                                    </v-list-item-content>
+                                    <v-list-item-subtitle v-text="'Play At : ' + (index + 1) "></v-list-item-subtitle>
+                                </v-list-item-content>
 
-                                    <v-list-item-action>
+                                <v-list-item-action v-if="$store.state.canVote" >
 
-                                        <v-list-item-action-text v-text="'sample action'"></v-list-item-action-text>
+                                    <!-- <v-list-item-action-text v-text="'sample action'"></v-list-item-action-text> -->
 
-                                        <v-icon
-                                            v-if="!active"
-                                            color="grey lighten-1"
-                                        >
-                                            mdi-star-outline
-                                        </v-icon>
+                                    <v-icon
+                                        v-if="voted_file_name != item.file"
+                                        color="grey lighten-1"
+                                    >
+                                        mdi-star-outline
+                                    </v-icon>
 
-                                        <v-icon
-                                            v-else
-                                            color="yellow darken-3"
-                                        >
-                                            mdi-star
-                                        </v-icon>
+                                    <v-icon
+                                        v-else
+                                        color="yellow darken-3"
+                                    >
+                                        mdi-star
+                                    </v-icon>
 
-                                    </v-list-item-action>
-                                </template>
+                                </v-list-item-action>
                             </v-list-item>
-
-                            <v-list-item >
-
-                                <template v-slot:default="{ active }">
-
-                                    <v-list-item-content>
-                                        <v-list-item-title v-text="'Sample Title'"></v-list-item-title>
-
-                                        <v-list-item-subtitle
-                                            class="text--primary"
-                                            v-text="'headline'"
-                                        ></v-list-item-subtitle>
-
-                                        <v-list-item-subtitle v-text="'Sample subtitile'"></v-list-item-subtitle>
-                                    </v-list-item-content>
-
-                                    <v-list-item-action>
-
-                                        <v-list-item-action-text v-text="'sample action'"></v-list-item-action-text>
-
-                                        <v-icon
-                                            v-if="!active"
-                                            color="grey lighten-1"
-                                        >
-                                            mdi-star-outline
-                                        </v-icon>
-
-                                        <v-icon
-                                            v-else
-                                            color="yellow darken-3"
-                                        >
-                                            mdi-star
-                                        </v-icon>
-
-                                    </v-list-item-action>
-                                </template>
-                            </v-list-item>
-
-                            <v-list-item >
-
-                                <template v-slot:default="{ active }">
-
-                                    <v-list-item-content>
-                                        <v-list-item-title v-text="'Sample Title'"></v-list-item-title>
-
-                                        <v-list-item-subtitle
-                                            class="text--primary"
-                                            v-text="'headline'"
-                                        ></v-list-item-subtitle>
-
-                                        <v-list-item-subtitle v-text="'Sample subtitile'"></v-list-item-subtitle>
-                                    </v-list-item-content>
-
-                                    <v-list-item-action>
-
-                                        <v-list-item-action-text v-text="'sample action'"></v-list-item-action-text>
-
-                                        <v-icon
-                                            v-if="!active"
-                                            color="grey lighten-1"
-                                        >
-                                            mdi-star-outline
-                                        </v-icon>
-
-                                        <v-icon
-                                            v-else
-                                            color="yellow darken-3"
-                                        >
-                                            mdi-star
-                                        </v-icon>
-
-                                    </v-list-item-action>
-                                </template>
-                            </v-list-item>
-
-                        
 
                         </template>
 
@@ -408,6 +329,10 @@
                 console.log('the array is ' , this.message_list);
             });
 
+            get_socket_node().on('votable_changed' , (arg) => {
+                this.$store.state.canVote = arg;
+            })
+
         },
 
         methods : {
@@ -429,6 +354,72 @@
 
                 get_socket_node().emit('request_delte_file' , {filename : file , room_id : this.$store.state.currentRoom});
 
+            },
+
+            changeCanVote(){
+
+                get_socket_node().emit('change_votable' , this.$store.state.currentRoom);
+
+            },
+
+            handleVoteMusic(music){
+
+                if(this.$store.state.canVote){
+
+                    if(this.voted_music != null){
+
+
+                        if(this.voted_music.file ==  music.file){
+                            // decrement vote count
+                            get_socket_node().emit('vote_music' , {
+                                room_id : this.$store.state.currentRoom,
+                                filename : music.file,
+                                vote_type : 'decrement'
+                            });
+
+                            this.voted_music = null;
+                            this.voted_file_name = '';
+
+                        }else{
+                            //increment vote count
+
+                            get_socket_node().emit('vote_music' , {
+                                room_id : this.$store.state.currentRoom,
+                                filename : this.voted_music.file,
+                                vote_type : 'decrement'
+                            });
+
+                            get_socket_node().emit('vote_music' , {
+                                room_id : this.$store.state.currentRoom,
+                                filename : music.file,
+                                vote_type : 'increment'
+                            });
+
+                            this.voted_music = music;
+                            this.voted_file_name = music.file
+                        }
+
+
+                    }else{
+                        //increment vote count
+
+                        get_socket_node().emit('vote_music' , {
+                            room_id : this.$store.state.currentRoom,
+                            filename : music.file,
+                            vote_type : 'increment'
+                        });
+
+                        this.voted_music = music;
+                        this.voted_file_name = music.file
+
+                    }
+
+
+
+                }
+            
+                
+
             }
 
         },
@@ -441,6 +432,8 @@
                 music_list : [],
                 userSocketID : get_socket_node().id,
                 message_text : '',
+                voted_music : null,
+                voted_file_name : ''
             }
         }
 

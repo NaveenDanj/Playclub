@@ -11,6 +11,7 @@ const store = new Vuex.Store({
         username : '',
         currentRoom : '',
         adminID : '',
+        canVote : false
     },
 
     mutations: {
