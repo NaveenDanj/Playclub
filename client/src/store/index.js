@@ -11,7 +11,8 @@ const store = new Vuex.Store({
         username : '',
         currentRoom : '',
         adminID : '',
-        canVote : false
+        canVote : false,
+        currentlyPlaying : 0,
     },
 
     mutations: {

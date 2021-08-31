@@ -67,9 +67,49 @@
 
                 <v-container>
 
-                    <audio style="width : 100% "  controls>
-                        <source src="http://www.mlk4.info/audio/71000/Ruwaththiye-Hashan-Balasuriya-musiclk-audio.mp3" type="audio/mpeg">
+                    <audio id="audioPlayer" style="display : none;"  controls>
+                        <source v-for="(item , index) in  this.music_list" :key="index" :src="'http://localhost:5555/getfile/' + item.file" type="audio/mpeg">
                     </audio>
+
+                    <v-card
+                        color="#952175"
+                        dark
+                    >
+                        <div class="d-flex flex-no-wrap justify-space-between">
+                        <div>
+                            <v-card-title
+                            class="text-h5"
+                            v-text="'Now Playing'"
+                            ></v-card-title>
+
+                            <v-card-subtitle v-text="'Pamkaya'"></v-card-subtitle>
+
+                            <v-card-actions>
+                            <v-btn
+                                @click="playSound"
+                                class="ml-2 mt-3"
+                                fab
+                                icon
+                                height="40px"
+                                right
+                                width="40px"
+                            >
+                                <v-icon>mdi-play</v-icon>
+                            </v-btn>
+
+                            
+                            </v-card-actions>
+                        </div>
+
+                        <v-avatar
+                            class="ma-3"
+                            size="125"
+                            tile
+                        >
+                            <v-img style="width : 20px;" src="https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fcdn.onlinewebfonts.com%2Fsvg%2Fimg_524930.png&f=1&nofb=1"></v-img>
+                        </v-avatar>
+                        </div>
+                    </v-card>
 
                 </v-container>
 
@@ -79,7 +119,7 @@
 
                 <v-container>
 
-                    <v-list height="35vh" style="overflow-y : scroll" flat>
+                    <v-list height="25vh" style="overflow-y : scroll" flat>
 
                         <v-subheader>
                             <h3>Music List({{this.music_list.length}})</h3>
@@ -278,6 +318,8 @@
 
         created(){
 
+            this.audioPlayer = new Audio();
+
             console.log('craeted');
 
             get_socket_node().on('new_music_upload' , (data) => {
@@ -300,7 +342,10 @@
                 this.$store.state.currentRoom = '';
                 this.$store.state.username = '';
                 this.$store.state.adminID = '';
+                this.audioPlayer.stop();
+                this.audioPlayer = null;
                 this.$router.replace('/');
+                
             });
 
             get_socket_node().emit('get_room_user_list' , this.$store.state.currentRoom);
@@ -331,11 +376,25 @@
 
             get_socket_node().on('votable_changed' , (arg) => {
                 this.$store.state.canVote = arg;
+            });
+
+            get_socket_node().on('start_straming_response' , () => {
+
+                this.audioPlayer.src = 'http://localhost:5555/getfile/' + this.music_list[0].file;
+                this.audioPlayer.currentTime  = 0;
+                this.audioPlayer.play();
+
             })
 
         },
 
+
+
         methods : {
+
+            playSound(){
+                get_socket_node().emit('start_streaming' , this.$store.state.currentRoom);
+            },
 
             handleKickUser(userid){
                 console.log('the user id is ' , userid);
@@ -433,7 +492,8 @@
                 userSocketID : get_socket_node().id,
                 message_text : '',
                 voted_music : null,
-                voted_file_name : ''
+                voted_file_name : '',
+                audioPlayer : null,
             }
         }
 

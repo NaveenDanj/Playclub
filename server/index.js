@@ -6,7 +6,6 @@ const multer = require('multer');
 const path = require('path');
 var fs = require('fs');
 
-
 // app.use(cors());
 
 let rooms = [];
@@ -39,8 +38,13 @@ const upload = multer({
 
 
 app.get('/' , (req , res) => {
-    res.send('Hello World');
+    res.send('hello');
 });
+
+app.get('/getfile/:filename' , (req , res) => {
+    res.sendFile(__dirname + '/uploads/' + req.params.filename)
+})
+
 
 
 app.post('/upload' , (req  , res) => {
@@ -57,9 +61,6 @@ app.post('/upload' , (req  , res) => {
     console.log('the request data is ' , req.body.test_data);
 
 })
-
-
-
 
 
 //socket 
@@ -87,6 +88,7 @@ io.on('connection' , (socket) => {
             obj.users = [{id : socket.id , username : arg.admin_name}];
             obj.music_files = [];
             obj.votable = false;
+            obj.currentlyPlaying = 0;
             rooms.push(arg);
             console.log('the rooms are' , rooms);
             socket.emit("create_room_success",  {admin_name : arg.admin_name , room_id : arg.room_id});
@@ -297,6 +299,14 @@ io.on('connection' , (socket) => {
         }
 
     });
+
+    //audio streaming system
+
+    socket.on('start_streaming' , (room) => {
+        io.to(room).emit('start_straming_response');
+    })
+
+
 
     //audio controling system
 
